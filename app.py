@@ -520,8 +520,8 @@ def api_garvis_export():
 # ROUTES — Promo Uplift
 # ═══════════════════════════════════════════════════════════════
 
-@app.route("/promo-uplift")
-def promo_uplift():
+@app.route("/promo-dashboard")
+def promo_dashboard():
     db            = load_json(KEY_PROMO_DB, [])
     baseline_meta = load_json(KEY_BASELINE_META, None)
     confirmed     = [p for p in db if (p.get("override") or p.get("auto_status")) == "confirmed"]
@@ -577,7 +577,7 @@ def upload_baseline():
     f = request.files.get("baseline_file")
     if not f or not f.filename:
         flash("No file selected.", "error")
-        return redirect(url_for("promo_uplift"))
+        return redirect(url_for("promo_dashboard"))
     path = UPLOADS_DIR / "baseline_latest.xlsx"
     f.save(path)
 
@@ -598,7 +598,7 @@ def upload_baseline():
     t.start()
 
     flash(f"Baseline file '{f.filename}' uploaded. Processing in background — this may take 1–2 minutes for large files. Refresh this page to see when it's ready.", "success")
-    return redirect(url_for("promo_uplift"))
+    return redirect(url_for("promo_dashboard"))
 
 @app.route("/baseline_status")
 def baseline_status():
@@ -651,7 +651,7 @@ def upload_promo():
     promo_name = request.form.get("promo_name", "").strip()
     if not f or not f.filename:
         flash("No file selected.", "error")
-        return redirect(url_for("promo_uplift"))
+        return redirect(url_for("promo_dashboard"))
     if not promo_name:
         promo_name = f.filename.replace(".xlsx", "").replace("_", " ")
     path     = UPLOADS_DIR / f"promo_{datetime.now().strftime('%Y%m%d_%H%M%S')}.xlsx"
@@ -672,7 +672,7 @@ def upload_promo():
     t.start()
 
     flash(f"Promo '{promo_name}' uploaded. Processing in background — refresh in a moment.", "success")
-    return redirect(url_for("promo_uplift"))
+    return redirect(url_for("promo_dashboard"))
 
 @app.route("/promo_status/<job_id>")
 def promo_status(job_id):
@@ -711,7 +711,7 @@ def recalculate_promo(promo_id):
     promo = next((p for p in db if p["id"] == promo_id), None)
     if not promo:
         flash("Promo not found.", "error")
-        return redirect(url_for("promo_uplift"))
+        return redirect(url_for("promo_dashboard"))
     try:
         for entry in promo["entries"]:
             entry["country"] = normalize_country(entry["country"])
@@ -774,7 +774,7 @@ def promo_detail(promo_id):
     promo = next((p for p in db if p["id"] == promo_id), None)
     if not promo:
         flash("Promo not found.", "error")
-        return redirect(url_for("promo_uplift"))
+        return redirect(url_for("promo_dashboard"))
     return render_template("promo_detail.html", promo=promo, threshold=EXECUTION_THRESHOLD)
 
 @app.route("/promo/<promo_id>/override", methods=["POST"])
@@ -798,7 +798,7 @@ def delete_promo(promo_id):
     db = [p for p in db if p["id"] != promo_id]
     save_json(KEY_PROMO_DB, db)
     flash("Promo deleted.", "success")
-    return redirect(url_for("promo_uplift"))
+    return redirect(url_for("promo_dashboard"))
 
 @app.route("/api/prefill")
 def prefill():
@@ -817,6 +817,111 @@ def prefill():
     vals = [m["uplift_pct"] for m in matches]
     return jsonify({"found": True, "count": len(matches),
                     "avg": round(sum(vals)/len(vals),1), "min": min(vals), "max": max(vals), "history": matches})
+
+# ── Promo Uplift Calculator (new module) ──────────────────────
+@app.route("/promo-uplift")
+def promo_uplift_calc_page():
+    return render_template("promo_uplift_page.html")
+
+@app.route("/run/promo-uplift", methods=["POST"])
+def api_promo_uplift():
+    try:
+        ly_file     = request.files.get("ly_file")
+        ty_file     = request.files.get("ty_file")
+        promo_start = request.form.get("promo_start")
+        promo_end   = request.form.get("promo_end")
+
+        if not ly_file or not ty_file:
+            return jsonify({"error": "Upload both files."}), 400
+        if not promo_start or not promo_end:
+            return jsonify({"error": "Select a promo period."}), 400
+
+        from datetime import datetime as dt
+        start = dt.strptime(promo_start, "%Y-%m-%d")
+        end   = dt.strptime(promo_end,   "%Y-%m-%d")
+
+        # Save files to disk temporarily
+        job_id = dt.now().strftime('%Y%m%d_%H%M%S%f')
+        ly_path = UPLOADS_DIR / f"promo_ly_{job_id}.xlsx"
+        ty_path = UPLOADS_DIR / f"promo_ty_{job_id}.xlsx"
+        ly_file.save(str(ly_path))
+        ty_file.save(str(ty_path))
+
+        # Start background thread
+        _set_job(job_id, "running", "Starting calculation...")
+        t = threading.Thread(
+            target=_process_promo_uplift_bg,
+            args=(str(ly_path), str(ty_path), start, end, job_id),
+            daemon=True
+        )
+        t.start()
+
+        return jsonify({"job_id": job_id, "status": "started"})
+    except Exception as e:
+        traceback.print_exc()
+        return jsonify({"error": str(e)}), 500
+
+def _process_promo_uplift_bg(ly_path, ty_path, start, end, job_id):
+    """Background processing for promo uplift calculation."""
+    import base64, json as _json
+    try:
+        from scripts.promo_uplift_calc import run_promo_uplift
+        def status(msg):
+            _set_job(job_id, "running", msg)
+
+        buf, stats = run_promo_uplift(
+            open(ly_path, 'rb'), open(ty_path, 'rb'),
+            start, end, status_cb=status
+        )
+
+        # Store result as base64 in DB (temporary)
+        result_b64 = base64.b64encode(buf.getvalue()).decode()
+        db_set(f"promo_uplift_result_{job_id}", {
+            "data": result_b64,
+            "stats": stats,
+            "filename": f"promo_uplift_{start.date()}_{end.date()}.xlsx"
+        })
+
+        _set_job(job_id, "done", _json.dumps(stats))
+    except Exception as e:
+        traceback.print_exc()
+        _set_job(job_id, "error", str(e))
+    finally:
+        # Clean up temp files
+        import os
+        for p in [ly_path, ty_path]:
+            try: os.remove(p)
+            except: pass
+
+@app.route("/promo-uplift/status/<job_id>")
+def promo_uplift_status(job_id):
+    import json as _json
+    job = _get_job(job_id)
+    if job["status"] == "done":
+        try:
+            stats = _json.loads(job["msg"])
+            return jsonify({"status": "done", "stats": stats})
+        except Exception:
+            return jsonify({"status": "done", "stats": {}})
+    return jsonify(job)
+
+@app.route("/promo-uplift/download/<job_id>")
+def promo_uplift_download(job_id):
+    import base64
+    result = db_get(f"promo_uplift_result_{job_id}")
+    if not result:
+        return jsonify({"error": "Result not found or expired."}), 404
+    data = base64.b64decode(result["data"])
+    buf  = io.BytesIO(data)
+    buf.seek(0)
+    # Clean up after download
+    db_set(f"promo_uplift_result_{job_id}", None)
+    return send_file(
+        buf,
+        mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        as_attachment=True,
+        download_name=result["filename"]
+    )
 
 @app.route("/debug/lookup")
 def debug_lookup():
