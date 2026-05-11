@@ -819,6 +819,90 @@ def prefill():
                     "avg": round(sum(vals)/len(vals),1), "min": min(vals), "max": max(vals), "history": matches})
 
 # ── Promo Uplift Calculator (new module) ──────────────────────
+@app.route("/uplift-applier")
+def uplift_applier_page():
+    return render_template("uplift_applier_page.html")
+
+@app.route("/run/uplift-applier", methods=["POST"])
+def api_uplift_applier():
+    try:
+        file        = request.files.get("file")
+        uplift_pct  = float(request.form.get("uplift_pct", 50))
+        promo_start = request.form.get("promo_start")
+        promo_end   = request.form.get("promo_end")
+
+        if not file:
+            return jsonify({"error": "Upload a workbench export file."}), 400
+        if not promo_start or not promo_end:
+            return jsonify({"error": "Select a promo period."}), 400
+
+        from datetime import datetime as dt
+        start = dt.strptime(promo_start, "%Y-%m-%d")
+        end   = dt.strptime(promo_end,   "%Y-%m-%d")
+
+        job_id    = dt.now().strftime('%Y%m%d_%H%M%S%f')
+        file_path = UPLOADS_DIR / f"uplift_{job_id}.xlsx"
+        file.save(str(file_path))
+
+        _set_job(job_id, "running", "Starting...")
+        t = threading.Thread(
+            target=_process_uplift_applier_bg,
+            args=(str(file_path), uplift_pct, start, end, job_id),
+            daemon=True
+        )
+        t.start()
+
+        return jsonify({"job_id": job_id, "status": "started"})
+    except Exception as e:
+        traceback.print_exc()
+        return jsonify({"error": str(e)}), 500
+
+def _process_uplift_applier_bg(file_path, uplift_pct, start, end, job_id):
+    import base64, json as _json
+    try:
+        from scripts.uplift_applier import run_uplift_applier
+        def status(msg):
+            _set_job(job_id, "running", msg)
+
+        buf, stats = run_uplift_applier(
+            open(file_path, 'rb'), uplift_pct, start, end, status_cb=status
+        )
+        result_b64 = base64.b64encode(buf.getvalue()).decode()
+        db_set(f"uplift_result_{job_id}", {"data": result_b64, "stats": stats})
+        _set_job(job_id, "done", _json.dumps(stats))
+    except Exception as e:
+        traceback.print_exc()
+        _set_job(job_id, "error", str(e))
+    finally:
+        import os
+        try: os.remove(file_path)
+        except: pass
+
+@app.route("/uplift-applier/status/<job_id>")
+def uplift_applier_status(job_id):
+    import json as _json
+    job = _get_job(job_id)
+    if job["status"] == "done":
+        try:
+            stats = _json.loads(job["msg"])
+            return jsonify({"status": "done", "stats": stats})
+        except Exception:
+            return jsonify({"status": "done", "stats": {}})
+    return jsonify(job)
+
+@app.route("/uplift-applier/download/<job_id>")
+def uplift_applier_download(job_id):
+    import base64
+    result = db_get(f"uplift_result_{job_id}")
+    if not result:
+        return jsonify({"error": "Result not found or expired."}), 404
+    buf = io.BytesIO(base64.b64decode(result["data"]))
+    db_set(f"uplift_result_{job_id}", None)
+    return send_file(buf,
+        mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        as_attachment=True,
+        download_name=f"uplift_result_{job_id}.xlsx")
+
 @app.route("/promo-uplift")
 def promo_uplift_calc_page():
     return render_template("promo_uplift_page.html")
