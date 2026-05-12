@@ -112,7 +112,7 @@ body{font-family:'Nunito Sans',sans-serif;background:var(--cream);color:var(--in
 .prog-bar{height:100%;background:linear-gradient(90deg,var(--teal),var(--teal-dark));border-radius:20px;animation:prog 2s ease-in-out infinite;}
 @keyframes prog{0%{width:5%;margin-left:0}50%{width:55%;margin-left:22%}100%{width:5%;margin-left:90%}}
 .hidden{display:none!important;}
-.pet-bg{position:fixed;bottom:0;right:0;width:min(900px,40vw);height:auto;object-fit:contain;object-position:bottom right;pointer-events:none;z-index:0;opacity:0.45;}
+.pet-bg{position:fixed;bottom:0;right:0;width:min(900px,40vw);height:auto;object-fit:contain;object-position:bottom right;pointer-events:none;z-index:-1;opacity:0.45;}
 @media (max-width:1300px){.pet-bg{opacity:0.25;width:min(700px,35vw);}}
 @media (max-width:1000px){.pet-bg{display:none;}}
 </style>
@@ -128,8 +128,8 @@ body{font-family:'Nunito Sans',sans-serif;background:var(--cream);color:var(--in
   <nav class="sb-nav">
     <div class="nav-sec">
       <div class="nav-lbl">Scripts</div>
-      <a class="nav-item" href="/"><div class="nav-icon">🚀</div>Launch Check<span class="nav-badge">Excel</span></a>
-      <a class="nav-item" href="/"><div class="nav-icon">📊</div>Garvis Export<span class="nav-badge">Excel</span></a>
+      <a class="nav-item" href="/?script=launch-check"><div class="nav-icon">🚀</div>Launch Check<span class="nav-badge">Excel</span></a>
+      <a class="nav-item" href="/?script=garvis-export"><div class="nav-icon">📊</div>Garvis Export<span class="nav-badge">Excel</span></a>
       <a class="nav-item" href="/promo-uplift"><div class="nav-icon">📈</div>Promo Uplift<span class="nav-badge">New</span></a>
       <a class="nav-item active" href="/uplift-applier"><div class="nav-icon">⚡</div>Uplift Applier<span class="nav-badge">New</span></a>
       <a class="nav-item" href="/promo-dashboard"><div class="nav-icon">🎯</div>Promo Dashboard<span class="nav-badge">Track</span></a>

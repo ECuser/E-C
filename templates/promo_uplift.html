@@ -114,7 +114,7 @@ tbody tr:hover td{background:#F5FAFA;}
 .page-credit{position:fixed;bottom:16px;right:20px;font-size:11px;color:var(--muted-light);font-weight:500;z-index:200;}
 .page-credit a{color:#4A7CC7;text-decoration:none;font-weight:700;}
 .page-credit a:hover{color:#1B4F9B;text-decoration:underline;}
-.pet-bg{position:fixed;bottom:0;right:0;width:min(900px,40vw);height:auto;object-fit:contain;object-position:bottom right;pointer-events:none;z-index:0;opacity:0.45;}
+.pet-bg{position:fixed;bottom:0;right:0;width:min(900px,40vw);height:auto;object-fit:contain;object-position:bottom right;pointer-events:none;z-index:-1;opacity:0.45;}
 @media (max-width:1300px){.pet-bg{opacity:0.25;width:min(700px,35vw);}}
 @media (max-width:1000px){.pet-bg{display:none;}}
 </style>
@@ -130,8 +130,8 @@ tbody tr:hover td{background:#F5FAFA;}
   <nav class="sb-nav">
     <div class="nav-sec">
       <div class="nav-lbl">Scripts</div>
-      <a class="nav-item" href="/"><div class="nav-icon">🚀</div>Launch Check<span class="nav-badge">Excel</span></a>
-      <a class="nav-item" href="/"><div class="nav-icon">📊</div>Garvis Export<span class="nav-badge">Excel</span></a>
+      <a class="nav-item" href="/?script=launch-check"><div class="nav-icon">🚀</div>Launch Check<span class="nav-badge">Excel</span></a>
+      <a class="nav-item" href="/?script=garvis-export"><div class="nav-icon">📊</div>Garvis Export<span class="nav-badge">Excel</span></a>
       <a class="nav-item" href="/promo-uplift"><div class="nav-icon">📈</div>Promo Uplift<span class="nav-badge">New</span></a>
       <a class="nav-item" href="/uplift-applier"><div class="nav-icon">⚡</div>Uplift Applier<span class="nav-badge">New</span></a>
       <a class="nav-item active" href="/promo-dashboard"><div class="nav-icon">🎯</div>Promo Dashboard<span class="nav-badge">Track</span></a>
