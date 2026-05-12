@@ -17,10 +17,10 @@
   --sb-w:272px;--r:14px;--rs:9px;
 }
 body{font-family:'Nunito Sans',sans-serif;background:var(--cream);color:var(--ink);display:flex;min-height:100vh;font-size:14px;}
-.sidebar{width:var(--sb-w);background:var(--teal-sb);display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;z-index:100;overflow-y:auto;}
+.sidebar{width:var(--sb-w);min-width:220px;background:var(--teal-sb);display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;z-index:100;overflow-y:auto;}
 .sb-brand{background:var(--teal-deeper);padding:20px 0 20px;position:relative;overflow:hidden;}
 .sb-top{display:flex;justify-content:center;align-items:center;width:100%;}
-.sb-top img{width:170px;display:block;margin:0 auto;}
+.sb-top img{width:170px;min-width:120px;display:block;margin:0 auto;}
 .sb-nav{flex:1;padding:16px 11px;}
 .nav-lbl{font-size:9.5px;font-weight:700;letter-spacing:.13em;text-transform:uppercase;color:rgba(255,255,255,0.27);padding:0 8px;margin-bottom:6px;}
 .nav-item{display:flex;align-items:center;gap:9px;padding:9px 10px;border-radius:8px;cursor:pointer;color:rgba(255,255,255,0.58);font-size:13px;font-weight:700;transition:all .15s;margin-bottom:3px;border:none;background:transparent;width:100%;text-align:left;font-family:'Nunito',sans-serif;text-decoration:none;}
@@ -85,9 +85,9 @@ select.ovr{font-size:11px;padding:3px 7px;width:auto;border-radius:6px;border:1p
 .week-detail{display:none;margin-top:6px;}
 .page-credit{position:fixed;bottom:16px;right:20px;font-size:11px;color:var(--muted-light);font-weight:500;z-index:200;}
 .page-credit a{color:#4A7CC7;text-decoration:none;font-weight:700;}
-.pet-bg{position:fixed;bottom:0;right:0;width:900px;height:750px;object-fit:contain;object-position:bottom right;pointer-events:none;z-index:0;opacity:0.45;mix-blend-mode:normal;}
-@media (max-width:1200px){.pet-bg{width:600px;height:500px;opacity:0.25;}}
-@media (max-width:900px){.pet-bg{display:none;}}
+.pet-bg{position:fixed;bottom:0;right:0;width:min(900px,40vw);height:auto;object-fit:contain;object-position:bottom right;pointer-events:none;z-index:0;opacity:0.45;}
+@media (max-width:1300px){.pet-bg{opacity:0.25;width:min(700px,35vw);}}
+@media (max-width:1000px){.pet-bg{display:none;}}
 </style>
 </head>
 <body>
@@ -104,8 +104,8 @@ select.ovr{font-size:11px;padding:3px 7px;width:auto;border-radius:6px;border:1p
       <a class="nav-item" href="/"><div class="nav-icon">🚀</div>Launch Check<span class="nav-badge">Excel</span></a>
       <a class="nav-item" href="/"><div class="nav-icon">📊</div>Garvis Export<span class="nav-badge">Excel</span></a>
       <a class="nav-item" href="/promo-uplift"><div class="nav-icon">📈</div>Promo Uplift<span class="nav-badge">New</span></a>
-      <a class="nav-item active" href="/uplift-applier"><div class="nav-icon">⚡</div>Uplift Applier<span class="nav-badge">New</span></a>
-      <a class="nav-item" href="/promo-dashboard"><div class="nav-icon">🎯</div>Promo Dashboard<span class="nav-badge">Track</span></a>
+      <a class="nav-item" href="/uplift-applier"><div class="nav-icon">⚡</div>Uplift Applier<span class="nav-badge">New</span></a>
+      <a class="nav-item active" href="/promo-dashboard"><div class="nav-icon">🎯</div>Promo Dashboard<span class="nav-badge">Track</span></a>
     </div>
     <div class="nav-sec">
       <div class="nav-lbl">Coming soon</div>
