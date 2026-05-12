@@ -64,6 +64,8 @@ body{font-family:'Nunito Sans',sans-serif;background:var(--cream);color:var(--in
 
 /* PET BACKGROUND */
 .pet-bg{position:fixed;bottom:0;right:0;width:900px;height:750px;object-fit:contain;object-position:bottom right;pointer-events:none;z-index:0;opacity:0.45;mix-blend-mode:normal;}
+@media (max-width:1200px){.pet-bg{width:600px;height:500px;opacity:0.25;}}
+@media (max-width:900px){.pet-bg{display:none;}}
 /* CONTENT */
 .content{padding:30px 36px;max-width:860px;width:100%;position:relative;z-index:1;}
 .page-hero{background:linear-gradient(130deg,var(--teal-deeper) 0%,var(--teal-dark) 55%,var(--teal) 100%);border-radius:var(--r);padding:22px 26px;margin-bottom:20px;position:relative;overflow:hidden;display:flex;align-items:center;gap:16px;}
