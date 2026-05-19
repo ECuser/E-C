@@ -819,6 +819,32 @@ def prefill():
                     "avg": round(sum(vals)/len(vals),1), "min": min(vals), "max": max(vals), "history": matches})
 
 # ── Promo Uplift Calculator (new module) ──────────────────────
+@app.route("/cfr-orders")
+def cfr_orders_page():
+    return render_template("cfr_orders_page.html")
+
+@app.route("/run/cfr-orders", methods=["POST"])
+def api_cfr_orders():
+    try:
+        from scripts.cfr_orders import run_cfr_orders
+        import json as _json
+        f = request.files.get("file")
+        if not f:
+            return jsonify({"error": "Upload an orders file."}), 400
+        buf, stats = run_cfr_orders(f)
+        fname = f"SAP_CARREFOUR_FR_{datetime.now().strftime('%Y%m%dT%H%M')}.xlsx"
+        response = send_file(
+            buf,
+            mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            as_attachment=True,
+            download_name=fname
+        )
+        response.headers['X-Stats'] = _json.dumps(stats)
+        return response
+    except Exception as e:
+        traceback.print_exc()
+        return jsonify({"error": str(e)}), 500
+
 @app.route("/uplift-applier")
 def uplift_applier_page():
     return render_template("uplift_applier_page.html")

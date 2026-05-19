@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Promo Uplift — E&C Script Hub</title>
+<title>CFR Orders — E&C Script Hub</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&family=Nunito+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -19,7 +19,7 @@
 }
 body{font-family:'Nunito Sans',sans-serif;background:var(--cream);color:var(--ink);display:flex;min-height:100vh;font-size:14px;}
 .sidebar{width:var(--sb-w);min-width:220px;background:var(--teal-sb);display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;z-index:100;overflow-y:auto;}
-.sb-brand{background:var(--teal-deeper);padding:20px 0 20px;position:relative;overflow:hidden;}
+.sb-brand{background:var(--teal-deeper);padding:20px 0 20px;}
 .sb-top{display:flex;justify-content:center;align-items:center;width:100%;}
 .sb-top img{width:170px;min-width:120px;display:block;margin:0 auto;}
 .sb-nav{flex:1;padding:16px 11px;}
@@ -43,7 +43,7 @@ body{font-family:'Nunito Sans',sans-serif;background:var(--cream);color:var(--in
 .tp-crumb strong{color:var(--ink);font-weight:700;}
 .tp-lanark{display:flex;align-items:center;text-decoration:none;opacity:.85;transition:opacity .15s;}
 .tp-lanark:hover{opacity:1;}
-.content{padding:30px 36px;max-width:900px;width:100%;}
+.content{padding:30px 36px;max-width:780px;width:100%;}
 .page-hero{background:linear-gradient(130deg,var(--teal-deeper) 0%,var(--teal-dark) 55%,var(--teal) 100%);border-radius:var(--r);padding:22px 26px;margin-bottom:22px;position:relative;overflow:hidden;display:flex;align-items:center;gap:16px;}
 .page-hero::before{content:'';position:absolute;top:-32px;right:-32px;width:140px;height:140px;border-radius:50%;background:rgba(255,255,255,0.06);}
 .hero-icon{width:48px;height:48px;background:rgba(255,255,255,0.15);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:21px;flex-shrink:0;}
@@ -52,23 +52,15 @@ body{font-family:'Nunito Sans',sans-serif;background:var(--cream);color:var(--in
 .hero-desc{font-size:12.5px;color:rgba(255,255,255,0.68);line-height:1.55;}
 .card{background:var(--white);border:1px solid var(--border);border-radius:var(--r);padding:22px 24px;margin-bottom:14px;box-shadow:0 2px 6px rgba(0,0,0,0.04);}
 .card-title{font-family:'Nunito',sans-serif;font-size:14px;font-weight:800;color:var(--ink);margin-bottom:16px;}
-.upload-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:20px;}
 .upload-lbl{font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:6px;}
-.upload-zone{border:2px dashed var(--border-mid);border-radius:9px;padding:20px 14px;text-align:center;cursor:pointer;transition:all .18s;position:relative;background:var(--cream);}
+.upload-zone{border:2px dashed var(--border-mid);border-radius:9px;padding:24px 14px;text-align:center;cursor:pointer;transition:all .18s;position:relative;background:var(--cream);margin-bottom:20px;}
 .upload-zone:hover{border-color:var(--teal);background:var(--teal-light);}
 .upload-zone.has-file{border-color:var(--teal);border-style:solid;background:var(--teal-light);}
 .upload-zone input[type="file"]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;}
-.uz-icon{font-size:24px;margin-bottom:6px;display:block;}
-.uz-title{font-family:'Nunito',sans-serif;font-size:12px;font-weight:700;color:var(--ink-soft);margin-bottom:2px;}
+.uz-icon{font-size:28px;margin-bottom:8px;display:block;}
+.uz-title{font-family:'Nunito',sans-serif;font-size:13px;font-weight:700;color:var(--ink-soft);margin-bottom:3px;}
 .uz-hint{font-size:11px;color:var(--muted-light);}
-.uz-name{font-size:11px;color:var(--teal-deeper);font-weight:700;margin-top:5px;font-family:monospace;word-break:break-all;}
-.date-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:20px;}
-.form-group label{display:block;font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:6px;}
-.form-group input[type="date"]{width:100%;font-size:13px;padding:9px 12px;border:1.5px solid var(--border-mid);border-radius:8px;background:var(--white);color:var(--ink);font-family:'Nunito Sans',sans-serif;}
-.form-group input[type="date"]:focus{outline:none;border-color:var(--teal);}
-.date-presets{display:flex;gap:8px;margin-bottom:6px;flex-wrap:wrap;}
-.preset-btn{font-size:11px;font-weight:600;padding:4px 12px;border:1.5px solid var(--border-mid);border-radius:20px;background:var(--white);color:var(--muted);cursor:pointer;transition:all .15s;font-family:'Nunito Sans',sans-serif;}
-.preset-btn:hover{border-color:var(--teal);color:var(--teal-dark);}
+.uz-name{font-size:12px;color:var(--teal-deeper);font-weight:700;margin-top:6px;font-family:monospace;}
 .btn-run{display:inline-flex;align-items:center;gap:8px;background:var(--teal);color:#fff;border:none;border-radius:9px;padding:12px 26px;font-size:13.5px;font-weight:800;font-family:'Nunito',sans-serif;cursor:pointer;transition:all .16s;box-shadow:0 4px 13px rgba(59,191,191,.35);}
 .btn-run:hover{background:var(--teal-dark);transform:translateY(-1px);}
 .btn-run:disabled{background:var(--muted-light);box-shadow:none;cursor:not-allowed;transform:none;}
@@ -80,9 +72,11 @@ body{font-family:'Nunito Sans',sans-serif;background:var(--cream);color:var(--in
 .alert-err{background:var(--error-bg);color:var(--error);border-color:#F5C6C2;}
 .alert-ico{font-size:16px;flex-shrink:0;margin-top:1px;}
 .alert-ttl{font-family:'Nunito',sans-serif;font-weight:800;margin-bottom:2px;font-size:13px;}
-.stats-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-top:16px;}
+.stats-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;margin-top:16px;}
 .stat-box{background:var(--cream);border-radius:9px;padding:12px 14px;}
-.stat-val{font-family:'Nunito',sans-serif;font-size:20px;font-weight:800;color:var(--ink);}
+.stat-val{font-family:'Nunito',sans-serif;font-size:22px;font-weight:800;color:var(--ink);}
+.stat-val.red{color:var(--error);}
+.stat-val.green{color:#1A6840;}
 .stat-lbl{font-size:11px;color:var(--muted);margin-top:2px;}
 .btn-dl{display:inline-flex;align-items:center;gap:8px;background:var(--white);color:var(--teal-deeper);border:2px solid var(--teal);border-radius:9px;padding:10px 20px;font-size:13px;font-weight:800;font-family:'Nunito',sans-serif;cursor:pointer;text-decoration:none;transition:all .16s;margin-top:16px;}
 .btn-dl:hover{background:var(--teal);color:#fff;}
@@ -91,11 +85,13 @@ body{font-family:'Nunito Sans',sans-serif;background:var(--cream);color:var(--in
 .how-step{display:flex;align-items:flex-start;gap:10px;margin-bottom:8px;font-size:12.5px;color:var(--muted);}
 .how-step:last-child{margin-bottom:0;}
 .how-num{width:20px;height:20px;border-radius:50%;background:var(--teal);color:#fff;font-size:10px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;}
+.rejected-badge{display:inline-flex;align-items:center;gap:5px;background:#FFCCCC;color:#C0392B;font-size:11px;font-weight:700;padding:2px 9px;border-radius:20px;}
 .page-credit{position:fixed;bottom:16px;right:20px;font-size:11px;color:var(--muted-light);font-weight:500;z-index:200;}
 .page-credit a{color:#4A7CC7;text-decoration:none;font-weight:700;}
 .pet-bg{position:fixed;bottom:0;right:0;width:min(900px,40vw);height:auto;object-fit:contain;object-position:bottom right;pointer-events:none;z-index:-1;opacity:0.45;}
 @media (max-width:1300px){.pet-bg{opacity:0.25;width:min(700px,35vw);}}
 @media (max-width:1000px){.pet-bg{display:none;}}
+.hidden{display:none!important;}
 </style>
 </head>
 <body>
@@ -111,18 +107,22 @@ body{font-family:'Nunito Sans',sans-serif;background:var(--cream);color:var(--in
       <div class="nav-lbl">Scripts</div>
       <a class="nav-item" href="/?script=launch-check"><div class="nav-icon">🚀</div>Launch Check<span class="nav-badge">Excel</span></a>
       <a class="nav-item" href="/?script=garvis-export"><div class="nav-icon">📊</div>Garvis Export<span class="nav-badge">Excel</span></a>
-      <a class="nav-item active" href="/promo-uplift"><div class="nav-icon">📈</div>Promo Uplift<span class="nav-badge">New</span></a>
+      <a class="nav-item" href="/promo-uplift"><div class="nav-icon">📈</div>Promo Uplift<span class="nav-badge">New</span></a>
       <a class="nav-item" href="/uplift-applier"><div class="nav-icon">⚡</div>Uplift Applier<span class="nav-badge">New</span></a>
-      <a class="nav-item" href="/cfr-orders"><div class="nav-icon">📦</div>CFR Orders<span class="nav-badge">New</span></a>
+      <a class="nav-item active" href="/cfr-orders"><div class="nav-icon">📦</div>CFR Orders<span class="nav-badge">New</span></a>
       <a class="nav-item" href="/promo-dashboard"><div class="nav-icon">🎯</div>Promo Dashboard<span class="nav-badge">Track</span></a>
     </div>
+  </nav>
+  <div class="sb-footer">
+    <div class="sb-credit">Edgard &amp; Cooper &middot; Internal use only<br>Built by <a href="https://lanark.be" target="_blank">Lanark</a></div>
+  </div>
 </aside>
 
 <div class="main">
   <div class="topbar">
     <div class="tp-left">
       <div class="tp-pill">E&amp;C Internal</div>
-      <div class="tp-crumb">Script Hub &rsaquo; <strong>Promo Uplift</strong></div>
+      <div class="tp-crumb">Script Hub &rsaquo; <strong>CFR Orders</strong></div>
     </div>
     <a href="https://lanark.be" target="_blank" class="tp-lanark">
       <div style="display:flex;flex-direction:column;line-height:1.2;">
@@ -135,73 +135,35 @@ body{font-family:'Nunito Sans',sans-serif;background:var(--cream);color:var(--in
   <div class="content">
 
     <div class="page-hero">
-      <div class="hero-icon">📈</div>
+      <div class="hero-icon">📦</div>
       <div class="hero-text">
-        <div class="hero-title">Promo Uplift Calculator</div>
-        <div class="hero-desc">Calculate promo units to register based on last year's uplift per subtype &amp; country, adjusted for what the forecast tool already anticipates.</div>
+        <div class="hero-title">CFR Orders</div>
+        <div class="hero-desc">Upload a Carrefour order file. The tool splits orders into ACCEPTED and REJECTED lines, groups them per order with a header, and highlights rejected lines in red.</div>
       </div>
     </div>
 
     <div class="card">
-      <div class="card-title">Upload files &amp; select promo period</div>
+      <div class="card-title">Upload &amp; process</div>
 
-      <!-- File uploads -->
-      <div class="upload-grid">
-        <div>
-          <div class="upload-lbl">Last year actuals</div>
-          <div class="upload-zone" id="zone-ly">
-            <input type="file" accept=".xlsx,.xls" id="input-ly" onchange="handleFile(this,'zone-ly','name-ly')">
-            <span class="uz-icon">📅</span>
-            <div class="uz-title">Drag or click to upload</div>
-            <div class="uz-hint">Workbench export — last year actuals only</div>
-            <div class="uz-name hidden" id="name-ly"></div>
-          </div>
-        </div>
-        <div>
-          <div class="upload-lbl">This year (actuals + forecast)</div>
-          <div class="upload-zone" id="zone-ty">
-            <input type="file" accept=".xlsx,.xls" id="input-ty" onchange="handleFile(this,'zone-ty','name-ty')">
-            <span class="uz-icon">📊</span>
-            <div class="uz-title">Drag or click to upload</div>
-            <div class="uz-hint">Workbench export — this year (needs forecast tab)</div>
-            <div class="uz-name hidden" id="name-ty"></div>
-          </div>
-        </div>
+      <div class="upload-lbl">Orders file (.xlsx or .csv)</div>
+      <div class="upload-zone" id="zone-file">
+        <input type="file" accept=".xlsx,.xls,.csv" id="input-file" onchange="handleFile(this)">
+        <span class="uz-icon">📋</span>
+        <div class="uz-title">Drag or click to upload</div>
+        <div class="uz-hint">.xlsx &middot; .xls &middot; .csv</div>
+        <div class="uz-name hidden" id="name-file"></div>
       </div>
 
-      <!-- Date range -->
-      <div style="margin-bottom:8px;">
-        <div class="upload-lbl">Promo period presets</div>
-        <div class="date-presets">
-          <button class="preset-btn" onclick="setDates('2026-11-16','2026-11-30')">🖤 Black Friday 2026</button>
-          <button class="preset-btn" onclick="setDates('2026-12-14','2026-12-28')">🎄 Christmas 2026</button>
-          <button class="preset-btn" onclick="setDates('2026-04-06','2026-04-20')">🐣 Easter 2026</button>
-          <button class="preset-btn" onclick="setDates('2026-11-27','2026-11-27')">Custom →</button>
-        </div>
-      </div>
-      <div class="date-row">
-        <div class="form-group">
-          <label>Promo start date</label>
-          <input type="date" id="promo-start" value="2026-11-16">
-        </div>
-        <div class="form-group">
-          <label>Promo end date</label>
-          <input type="date" id="promo-end" value="2026-11-30">
-        </div>
-      </div>
-
-      <button class="btn-run" id="btn-run" onclick="runCalc()">▶&nbsp; Calculate uplift</button>
+      <button class="btn-run" id="btn-run" onclick="runCalc()">▶&nbsp; Process orders</button>
     </div>
 
-    <!-- How it works -->
     <div class="card">
       <div class="how-it-works">
         <div class="how-title">How it works</div>
-        <div class="how-step"><div class="how-num">1</div>Calculates average weekly sales per <strong>Subtype × Country</strong> over the full last year</div>
-        <div class="how-step"><div class="how-num">2</div>Measures the uplift factor during the equivalent promo period last year</div>
-        <div class="how-step"><div class="how-num">3</div>Checks what uplift the forecast tool already baked in for this year's promo weeks</div>
-        <div class="how-step"><div class="how-num">4</div>Calculates <strong>net uplift to register</strong> = LY factor ÷ tool factor, applied per SKU</div>
-        <div class="how-step"><div class="how-num">5</div>Outputs an Excel with promo units per SKU per week, ready to register</div>
+        <div class="how-step"><div class="how-num">1</div>Reads order reference, EAN, ordered qty and received qty per line</div>
+        <div class="how-step"><div class="how-num">2</div>Splits each line into <strong>ACCEPTED</strong> (qty received) and <strong>REJECTED</strong> (qty ordered − received)</div>
+        <div class="how-step"><div class="how-num">3</div>Groups lines per order with a header row showing order ref, date, address</div>
+        <div class="how-step"><div class="how-num">4</div><span class="rejected-badge">🔴 REJECTED</span> rows are fully colored red in the output</div>
       </div>
     </div>
 
@@ -210,25 +172,18 @@ body{font-family:'Nunito Sans',sans-serif;background:var(--cream);color:var(--in
   </div>
 </div>
 
+<img class="pet-bg" src="{{ url_for('static', filename='pets_transparent.png') }}" alt="">
 <div class="page-credit">Built by <a href="https://lanark.be" target="_blank">Lanark</a></div>
 
 <script>
-function handleFile(input, zoneId, nameId) {
-  const zone = document.getElementById(zoneId);
-  const nameEl = document.getElementById(nameId);
+function handleFile(input) {
+  const zone = document.getElementById('zone-file');
+  const nameEl = document.getElementById('name-file');
   if (input.files && input.files[0]) {
     zone.classList.add('has-file');
     nameEl.textContent = '✓ ' + input.files[0].name;
     nameEl.classList.remove('hidden');
-  } else {
-    zone.classList.remove('has-file');
-    nameEl.classList.add('hidden');
   }
-}
-
-function setDates(start, end) {
-  document.getElementById('promo-start').value = start;
-  document.getElementById('promo-end').value = end;
 }
 
 function showErr(msg) {
@@ -241,116 +196,55 @@ function showErr(msg) {
     </div>`;
 }
 
-function showProgress(msg) {
-  document.getElementById('result-area').innerHTML = `
-    <div class="result-card">
-      <div class="alert alert-ok" style="background:#FFF9EC;border-color:#F0D890;color:#7A5010;">
-        <div class="alert-ico">⏳</div>
-        <div>
-          <div class="alert-ttl">Processing...</div>
-          <div id="progress-msg">${msg}</div>
-          <div style="margin-top:10px;background:#F0EDE6;border-radius:20px;height:5px;overflow:hidden;">
-            <div style="height:100%;background:linear-gradient(90deg,#3BBFBF,#2A9595);border-radius:20px;animation:prog 2s ease-in-out infinite;"></div>
-          </div>
-          <style>@keyframes prog{0%{width:5%;margin-left:0}50%{width:55%;margin-left:22%}100%{width:5%;margin-left:90%}}</style>
-        </div>
-      </div>
-    </div>`;
-}
-
-let _pollInterval = null;
-
 async function runCalc() {
-  const ly = document.getElementById('input-ly');
-  const ty = document.getElementById('input-ty');
-  const start = document.getElementById('promo-start').value;
-  const end   = document.getElementById('promo-end').value;
-
-  if (!ly.files[0] || !ty.files[0]) { showErr('Please upload both files first.'); return; }
-  if (!start || !end) { showErr('Please select a promo period.'); return; }
-  if (start > end) { showErr('Start date must be before end date.'); return; }
+  const file = document.getElementById('input-file');
+  if (!file.files[0]) { showErr('Please upload an orders file first.'); return; }
 
   const btn = document.getElementById('btn-run');
   btn.disabled = true;
-  btn.innerHTML = '<div class="spinner"></div> Uploading files…';
+  btn.innerHTML = '<div class="spinner"></div> Processing…';
   document.getElementById('result-area').innerHTML = '';
 
   const form = new FormData();
-  form.append('ly_file', ly.files[0]);
-  form.append('ty_file', ty.files[0]);
-  form.append('promo_start', start);
-  form.append('promo_end', end);
+  form.append('file', file.files[0]);
 
   try {
-    const resp = await fetch('/run/promo-uplift', { method: 'POST', body: form });
+    const resp = await fetch('/run/cfr-orders', { method: 'POST', body: form });
     if (!resp.ok) {
       const e = await resp.json().catch(() => ({ error: resp.statusText }));
       throw new Error(e.error || resp.statusText);
     }
-    const data = await resp.json();
-    const jobId = data.job_id;
 
-    btn.innerHTML = '<div class="spinner"></div> Processing…';
-    showProgress('Files uploaded. Reading Excel data...');
+    const statsHeader = resp.headers.get('X-Stats');
+    const stats = statsHeader ? JSON.parse(statsHeader) : {};
+    const blob  = await resp.blob();
+    const url   = URL.createObjectURL(blob);
+    const fname = `SAP_CARREFOUR_FR_${new Date().toISOString().slice(0,10).replace(/-/g,'')}.xlsx`;
 
-    // Poll for status
-    _pollInterval = setInterval(() => pollStatus(jobId, start, end), 6000);
+    document.getElementById('result-area').innerHTML = `
+      <div class="result-card">
+        <div class="alert alert-ok">
+          <div class="alert-ico">✅</div>
+          <div><div class="alert-ttl">Processing complete!</div>
+            Orders processed and grouped. REJECTED lines are highlighted in red.
+          </div>
+        </div>
+        <div class="stats-row">
+          <div class="stat-box"><div class="stat-val">${stats.orders ?? '—'}</div><div class="stat-lbl">Orders</div></div>
+          <div class="stat-box"><div class="stat-val green">${stats.accepted ?? '—'}</div><div class="stat-lbl">Accepted lines</div></div>
+          <div class="stat-box"><div class="stat-val red">${stats.rejected ?? '—'}</div><div class="stat-lbl">Rejected lines</div></div>
+          <div class="stat-box"><div class="stat-val">${stats.total ?? '—'}</div><div class="stat-lbl">Total lines</div></div>
+        </div>
+        <a class="btn-dl" href="${url}" download="${fname}">⬇&nbsp; Download SAP file (.xlsx)</a>
+      </div>`;
 
   } catch(e) {
     showErr(e.message);
+  } finally {
     btn.disabled = false;
-    btn.innerHTML = '▶&nbsp; Calculate uplift';
-  }
-}
-
-async function pollStatus(jobId, start, end) {
-  try {
-    const resp = await fetch(`/promo-uplift/status/${jobId}`);
-    const data = await resp.json();
-
-    if (data.status === 'done') {
-      clearInterval(_pollInterval);
-      const stats = data.stats || {};
-      const fname = `promo_uplift_${start}_${end}.xlsx`;
-
-      document.getElementById('result-area').innerHTML = `
-        <div class="result-card">
-          <div class="alert alert-ok">
-            <div class="alert-ico">✅</div>
-            <div><div class="alert-ttl">Calculation complete!</div>
-              2 sheets: <strong>Promo Registration</strong> (per SKU) and <strong>Uplift Summary</strong> (per subtype/country).
-            </div>
-          </div>
-          <div class="stats-row">
-            <div class="stat-box"><div class="stat-val">${stats.promo_weeks ?? '—'}</div><div class="stat-lbl">Promo weeks</div></div>
-            <div class="stat-box"><div class="stat-val">${stats.sku_count?.toLocaleString() ?? '—'}</div><div class="stat-lbl">SKUs processed</div></div>
-            <div class="stat-box"><div class="stat-val">${stats.subtypes ?? '—'}</div><div class="stat-lbl">Subtypes</div></div>
-            <div class="stat-box"><div class="stat-val">${stats.countries ?? '—'}</div><div class="stat-lbl">Countries</div></div>
-            <div class="stat-box"><div class="stat-val">${stats.avg_ly_uplift ? stats.avg_ly_uplift + 'x' : '—'}</div><div class="stat-lbl">Avg LY uplift</div></div>
-          </div>
-          <a class="btn-dl" href="/promo-uplift/download/${jobId}" download="${fname}">⬇&nbsp; Download promo registration (.xlsx)</a>
-        </div>`;
-
-      document.getElementById('btn-run').disabled = false;
-      document.getElementById('btn-run').innerHTML = '▶&nbsp; Calculate uplift';
-
-    } else if (data.status === 'error') {
-      clearInterval(_pollInterval);
-      showErr(data.msg || 'Unknown error.');
-      document.getElementById('btn-run').disabled = false;
-      document.getElementById('btn-run').innerHTML = '▶&nbsp; Calculate uplift';
-
-    } else {
-      // Still running — update message
-      const msgEl = document.getElementById('progress-msg');
-      if (msgEl) msgEl.textContent = data.msg || 'Processing...';
-    }
-  } catch(e) {
-    // Network hiccup — keep polling
+    btn.innerHTML = '▶&nbsp; Process orders';
   }
 }
 </script>
-
-<img class="pet-bg" src="{{ url_for('static', filename='pets_transparent.png') }}" alt="">
 </body>
 </html>
