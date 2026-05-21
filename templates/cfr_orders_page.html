@@ -176,6 +176,30 @@ body{font-family:'Nunito Sans',sans-serif;background:var(--cream);color:var(--in
 <div class="page-credit">Built by <a href="https://lanark.be" target="_blank">Lanark</a></div>
 
 <script>
+async function downloadPdf(e) {
+  e.preventDefault();
+  const file = document.getElementById('input-file');
+  if (!file.files[0]) return;
+  const btn = document.getElementById('btn-pdf');
+  btn.textContent = '⏳ Generating PDF...';
+  const form = new FormData();
+  form.append('file', file.files[0]);
+  try {
+    const resp = await fetch('/run/cfr-orders-pdf', { method: 'POST', body: form });
+    if (!resp.ok) throw new Error('PDF generation failed');
+    const blob = await resp.blob();
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement('a');
+    a.href = url;
+    a.download = `CFR_ORDERS_${new Date().toISOString().slice(0,10).replace(/-/g,'')}.pdf`;
+    a.click();
+  } catch(e) {
+    alert('Error: ' + e.message);
+  } finally {
+    btn.innerHTML = '📄&nbsp; Download PDF per order';
+  }
+}
+
 function handleFile(input) {
   const zone = document.getElementById('zone-file');
   const nameEl = document.getElementById('name-file');
@@ -236,6 +260,7 @@ async function runCalc() {
           <div class="stat-box"><div class="stat-val">${stats.total ?? '—'}</div><div class="stat-lbl">Total lines</div></div>
         </div>
         <a class="btn-dl" href="${url}" download="${fname}">⬇&nbsp; Download SAP file (.xlsx)</a>
+        <a class="btn-dl" id="btn-pdf" style="margin-left:10px;background:#E74C3C;color:#fff;border-color:#C0392B;" href="#" onclick="downloadPdf(event)">📄&nbsp; Download PDF per order</a>
       </div>`;
 
   } catch(e) {

@@ -845,6 +845,32 @@ def api_cfr_orders():
         traceback.print_exc()
         return jsonify({"error": str(e)}), 500
 
+@app.route("/run/cfr-orders-pdf", methods=["POST"])
+def api_cfr_orders_pdf():
+    try:
+        from scripts.cfr_orders import load_excel_flex, transform_for_sap
+        from scripts.cfr_pdf import generate_cfr_pdf
+        import json as _json
+        f = request.files.get("file")
+        if not f:
+            return jsonify({"error": "Upload an orders file."}), 400
+        df_raw = load_excel_flex(f)
+        out_df = transform_for_sap(df_raw)
+        buf    = generate_cfr_pdf(out_df)
+        n_orders = int(out_df["OrderRef"].nunique()) if not out_df.empty else 0
+        fname = f"CFR_ORDERS_{datetime.now().strftime('%Y%m%dT%H%M')}.pdf"
+        response = send_file(
+            buf,
+            mimetype="application/pdf",
+            as_attachment=True,
+            download_name=fname
+        )
+        response.headers['X-Stats'] = _json.dumps({"orders": n_orders})
+        return response
+    except Exception as e:
+        traceback.print_exc()
+        return jsonify({"error": str(e)}), 500
+
 @app.route("/uplift-applier")
 def uplift_applier_page():
     return render_template("uplift_applier_page.html")
