@@ -246,7 +246,7 @@ def run_promo_uplift(ly_file, ty_file, promo_start, promo_end, status_cb=None):
     ty_output_dims = [(c, find_col(ty_fc, [c])) for c in OUTPUT_DIMS]
     ty_output_dims = [(label, col) for label, col in ty_output_dims if col]
 
-    ty_fc['_sub'] = ty_fc[ty_subtype_col].astype(str).str.strip()
+    ty_fc['_sub'] = ty_fc[ty_subtype_col].astype(str).str.strip() if ty_subtype_col else ''
     ty_fc['_cty'] = ty_fc[ty_country_col].astype(str).str.strip()
     promo_col_names = [str(c).strip() for c in ty_promo_cols]
 
