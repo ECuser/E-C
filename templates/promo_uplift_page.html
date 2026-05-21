@@ -190,6 +190,21 @@ body{font-family:'Nunito Sans',sans-serif;background:var(--cream);color:var(--in
         </div>
       </div>
 
+      <!-- LY reference period -->
+      <div style="margin-bottom:8px;margin-top:4px;">
+        <div class="upload-lbl">Last year reference period <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--muted-light);">(optional — leave blank to auto-calculate 52 weeks back)</span></div>
+      </div>
+      <div class="date-row">
+        <div class="form-group">
+          <label>LY reference start</label>
+          <input type="date" id="ly-ref-start" placeholder="">
+        </div>
+        <div class="form-group">
+          <label>LY reference end</label>
+          <input type="date" id="ly-ref-end" placeholder="">
+        </div>
+      </div>
+
       <button class="btn-run" id="btn-run" onclick="runCalc()">▶&nbsp; Calculate uplift</button>
     </div>
 
@@ -280,6 +295,10 @@ async function runCalc() {
   form.append('ty_file', ty.files[0]);
   form.append('promo_start', start);
   form.append('promo_end', end);
+  const lyRefStart = document.getElementById('ly-ref-start').value;
+  const lyRefEnd   = document.getElementById('ly-ref-end').value;
+  if (lyRefStart) form.append('ly_ref_start', lyRefStart);
+  if (lyRefEnd)   form.append('ly_ref_end',   lyRefEnd);
 
   try {
     const resp = await fetch('/run/promo-uplift', { method: 'POST', body: form });
@@ -324,7 +343,7 @@ async function pollStatus(jobId, start, end) {
           <div class="stats-row">
             <div class="stat-box"><div class="stat-val">${stats.promo_weeks ?? '—'}</div><div class="stat-lbl">Promo weeks</div></div>
             <div class="stat-box"><div class="stat-val">${stats.sku_count?.toLocaleString() ?? '—'}</div><div class="stat-lbl">SKUs processed</div></div>
-            <div class="stat-box"><div class="stat-val">${stats.subtypes ?? '—'}</div><div class="stat-lbl">Subtypes</div></div>
+            <div class="stat-box"><div class="stat-val">${(stats.unique_skus || stats.sku_count || '—').toLocaleString()}</div><div class="stat-lbl">Unique SKUs</div></div>
             <div class="stat-box"><div class="stat-val">${stats.countries ?? '—'}</div><div class="stat-lbl">Countries</div></div>
             <div class="stat-box"><div class="stat-val">${stats.avg_ly_uplift ? stats.avg_ly_uplift + 'x' : '—'}</div><div class="stat-lbl">Avg LY uplift</div></div>
           </div>

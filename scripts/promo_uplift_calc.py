@@ -86,7 +86,8 @@ def read_lean(file_obj, sheet_name, promo_dates=None, extra_dim_cols=None):
     return df, [str(c).strip() for c in dim_cols], wc_stripped
 
 
-def run_promo_uplift(ly_file, ty_file, promo_start, promo_end, status_cb=None):
+def run_promo_uplift(ly_file, ty_file, promo_start, promo_end,
+                     ly_ref_start=None, ly_ref_end=None, status_cb=None):
     def status(msg):
         if status_cb:
             status_cb(msg)
@@ -119,20 +120,30 @@ def run_promo_uplift(ly_file, ty_file, promo_start, promo_end, status_cb=None):
         avail = [str(c).strip() for c in ty_all_week_cols[:5]]
         raise ValueError(f"No forecast weeks found between {promo_start} and {promo_end}. Available: {avail}...")
 
-    # ── Detect LY equivalent promo weeks ───────────────────────
-    ly_promo_start = promo_start - timedelta(weeks=52)
-    ly_promo_end   = promo_end   - timedelta(weeks=52)
-
+    # ── LY equivalent promo weeks ───────────────────────────────
     if hasattr(ly_file, 'seek'): ly_file.seek(0)
     ly_header = pd.read_excel(ly_file, sheet_name=ly_actual_sheet, nrows=0, engine='openpyxl')
     ly_all_week_cols = [c for c in ly_header.columns if parse_date(c) is not None]
-    ly_promo_cols    = [c for c in ly_all_week_cols
-                        if parse_date(c) and ly_promo_start <= parse_date(c) <= ly_promo_end]
-    if not ly_promo_cols:
+
+    if ly_ref_start and ly_ref_end:
+        # Manual LY reference period
+        ly_ref_start = ly_ref_start.date() if hasattr(ly_ref_start, 'date') else ly_ref_start
+        ly_ref_end   = ly_ref_end.date()   if hasattr(ly_ref_end,   'date') else ly_ref_end
         ly_promo_cols = [c for c in ly_all_week_cols
-                         if parse_date(c) and promo_start <= parse_date(c) <= promo_end]
+                         if parse_date(c) and ly_ref_start <= parse_date(c) <= ly_ref_end]
+    else:
+        # Auto: 52 weeks back
+        ly_promo_start = promo_start - timedelta(weeks=52)
+        ly_promo_end   = promo_end   - timedelta(weeks=52)
+        ly_promo_cols  = [c for c in ly_all_week_cols
+                          if parse_date(c) and ly_promo_start <= parse_date(c) <= ly_promo_end]
+        if not ly_promo_cols:
+            ly_promo_cols = [c for c in ly_all_week_cols
+                             if parse_date(c) and promo_start <= parse_date(c) <= promo_end]
+
     if not ly_promo_cols:
-        raise ValueError(f"No LY weeks found for {ly_promo_start}–{ly_promo_end}.")
+        avail = [str(c).strip() for c in ly_all_week_cols[:5]]
+        raise ValueError(f"No LY weeks found for the selected reference period. LY file starts at: {avail}")
 
     ly_normal_cols = [c for c in ly_all_week_cols
                       if c not in ly_promo_cols]
@@ -305,7 +316,7 @@ def run_promo_uplift(ly_file, ty_file, promo_start, promo_end, status_cb=None):
     stats = {
         'promo_weeks':   len(ty_promo_stripped),
         'sku_count':     len(output_df),
-        'skus':          int(summary['SKU'].nunique()),
+        'unique_skus':   int(output_df['ProductID'].nunique()) if 'ProductID' in output_df.columns else len(output_df),
         'countries':     int(summary['Country'].nunique()),
         'avg_ly_uplift': round(float(summary['LY uplift factor'].replace('',np.nan).dropna().astype(float).mean()), 2)
                          if summary['LY uplift factor'].replace('',np.nan).dropna().any() else None,

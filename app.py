@@ -976,6 +976,12 @@ def api_promo_uplift():
         start = dt.strptime(promo_start, "%Y-%m-%d")
         end   = dt.strptime(promo_end,   "%Y-%m-%d")
 
+        # Optional LY reference period
+        ly_start_str = request.form.get("ly_ref_start")
+        ly_end_str   = request.form.get("ly_ref_end")
+        ly_ref_start = dt.strptime(ly_start_str, "%Y-%m-%d") if ly_start_str else None
+        ly_ref_end   = dt.strptime(ly_end_str,   "%Y-%m-%d") if ly_end_str   else None
+
         # Save files to disk temporarily
         job_id = dt.now().strftime('%Y%m%d_%H%M%S%f')
         ly_path = UPLOADS_DIR / f"promo_ly_{job_id}.xlsx"
@@ -987,7 +993,7 @@ def api_promo_uplift():
         _set_job(job_id, "running", "Starting calculation...")
         t = threading.Thread(
             target=_process_promo_uplift_bg,
-            args=(str(ly_path), str(ty_path), start, end, job_id),
+            args=(str(ly_path), str(ty_path), start, end, job_id, ly_ref_start, ly_ref_end),
             daemon=True
         )
         t.start()
@@ -997,7 +1003,7 @@ def api_promo_uplift():
         traceback.print_exc()
         return jsonify({"error": str(e)}), 500
 
-def _process_promo_uplift_bg(ly_path, ty_path, start, end, job_id):
+def _process_promo_uplift_bg(ly_path, ty_path, start, end, job_id, ly_ref_start=None, ly_ref_end=None):
     """Background processing for promo uplift calculation."""
     import base64, json as _json
     try:
@@ -1007,7 +1013,8 @@ def _process_promo_uplift_bg(ly_path, ty_path, start, end, job_id):
 
         buf, stats = run_promo_uplift(
             open(ly_path, 'rb'), open(ty_path, 'rb'),
-            start, end, status_cb=status
+            start, end, ly_ref_start=ly_ref_start, ly_ref_end=ly_ref_end,
+            status_cb=status
         )
 
         # Store result as base64 in DB (temporary)
