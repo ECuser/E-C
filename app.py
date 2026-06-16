@@ -18,79 +18,30 @@ UPLOADS_DIR.mkdir(exist_ok=True)
 EXECUTION_THRESHOLD = 20
 
 # ═══════════════════════════════════════════════════════════════
-# DATABASE LAYER — PostgreSQL
+# STORAGE LAYER — In-memory (no database needed)
+# Results stored in RAM per worker process
 # ═══════════════════════════════════════════════════════════════
-import psycopg2
-from psycopg2.extras import Json
-
-_db_conn = None
-
-def get_db():
-    global _db_conn
-    db_url = os.environ.get("DATABASE_URL")
-    if not db_url:
-        raise RuntimeError("DATABASE_URL environment variable not set.")
-    try:
-        if _db_conn is None or _db_conn.closed:
-            raise Exception("reconnect")
-        _db_conn.cursor().execute("SELECT 1")
-    except Exception:
-        _db_conn = psycopg2.connect(db_url, sslmode="require")
-        _db_conn.autocommit = True
-    return _db_conn
-
-def init_db():
-    conn = get_db()
-    cur  = conn.cursor()
-    cur.execute("""
-        CREATE TABLE IF NOT EXISTS kv_store (
-            key        TEXT PRIMARY KEY,
-            value      JSONB NOT NULL,
-            updated_at TIMESTAMP DEFAULT NOW()
-        )
-    """)
-    cur.close()
+_store = {}  # in-memory key-value store
 
 def db_get(key, default=None):
-    try:
-        cur = get_db().cursor()
-        cur.execute("SELECT value FROM kv_store WHERE key = %s", (key,))
-        row = cur.fetchone()
-        cur.close()
-        return row[0] if row else default
-    except Exception as e:
-        print(f"db_get error: {e}")
-        return default
+    return _store.get(key, default)
 
 def db_set(key, value):
-    try:
-        cur = get_db().cursor()
-        cur.execute("""
-            INSERT INTO kv_store (key, value, updated_at)
-            VALUES (%s, %s, NOW())
-            ON CONFLICT (key) DO UPDATE
-              SET value = EXCLUDED.value, updated_at = NOW()
-        """, (key, Json(value)))
-        cur.close()
-    except Exception as e:
-        print(f"db_set error: {e}")
-
-try:
-    init_db()
-    print("Database initialized.")
-except Exception as e:
-    print(f"Database init failed: {e}")
-
-# ─── Key constants ────────────────────────────────────────────
-KEY_BASELINE      = "baseline"
-KEY_BASELINE_META = "baseline_meta"
-KEY_PROMO_DB      = "promo_db"
+    if value is None:
+        _store.pop(key, None)
+    else:
+        _store[key] = value
 
 def load_json(key, default):
     return db_get(key, default)
 
 def save_json(key, data):
     db_set(key, data)
+
+# Unused key constants kept for compatibility
+KEY_BASELINE      = "baseline"
+KEY_BASELINE_META = "baseline_meta"
+KEY_PROMO_DB      = "promo_db"
 
 def parse_and_save_baseline(filepath, filename, job_id):
     """
