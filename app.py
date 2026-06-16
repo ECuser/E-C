@@ -507,14 +507,64 @@ def api_garvis_export():
         garvis_file = request.files.get("garvis_file")
         if not garvis_file:
             return jsonify({"error": "Upload a Garvis export file."}), 400
-        output_buf, stats = run_garvis_export(garvis_file)
-        return send_file(output_buf,
-            mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-            as_attachment=True,
-            download_name=f"GARVIS_OVERVIEW_{datetime.now().strftime('%Y%m%dT%H%M')}.xlsx")
+
+        # Save to disk and process in background to avoid 30s timeout
+        job_id    = datetime.now().strftime('%Y%m%d_%H%M%S%f')
+        file_path = UPLOADS_DIR / f"garvis_{job_id}.xlsx"
+        garvis_file.save(str(file_path))
+
+        _set_job(job_id, "running", "Processing Garvis export...")
+        t = threading.Thread(
+            target=_process_garvis_bg,
+            args=(str(file_path), job_id),
+            daemon=True
+        )
+        t.start()
+
+        return jsonify({"job_id": job_id, "status": "started"})
     except Exception as e:
         traceback.print_exc()
         return jsonify({"error": str(e)}), 500
+
+def _process_garvis_bg(file_path, job_id):
+    import base64, json as _json, os
+    try:
+        output_buf, stats = run_garvis_export(open(file_path, 'rb'))
+        result_b64 = base64.b64encode(output_buf.getvalue()).decode()
+        fname = f"GARVIS_OVERVIEW_{datetime.now().strftime('%Y%m%dT%H%M')}.xlsx"
+        db_set(f"garvis_result_{job_id}", {"data": result_b64, "filename": fname, "stats": stats})
+        _set_job(job_id, "done", _json.dumps(stats))
+    except Exception as e:
+        traceback.print_exc()
+        _set_job(job_id, "error", str(e))
+    finally:
+        try: os.remove(file_path)
+        except: pass
+
+@app.route("/garvis-export/status/<job_id>")
+def garvis_export_status(job_id):
+    import json as _json
+    job = _get_job(job_id)
+    if job["status"] == "done":
+        try:
+            stats = _json.loads(job["msg"])
+            return jsonify({"status": "done", "stats": stats})
+        except Exception:
+            return jsonify({"status": "done", "stats": {}})
+    return jsonify(job)
+
+@app.route("/garvis-export/download/<job_id>")
+def garvis_export_download(job_id):
+    import base64
+    result = db_get(f"garvis_result_{job_id}")
+    if not result:
+        return jsonify({"error": "Result not found or expired."}), 404
+    buf = io.BytesIO(base64.b64decode(result["data"]))
+    db_set(f"garvis_result_{job_id}", None)
+    return send_file(buf,
+        mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        as_attachment=True,
+        download_name=result["filename"])
 
 # ═══════════════════════════════════════════════════════════════
 # ROUTES — Promo Uplift

@@ -291,16 +291,36 @@ async function runLaunchCheck(){
 async function runGarvisExport(){
   const g=document.getElementById('input-garvis');
   if(!g.files[0]){showErr('result-garvis','Please upload your Garvis export file first.');return;}
-  setBtn('btn-garvis',true);showLoad('result-garvis','Building overview');
+  setBtn('btn-garvis',true,'<span style="display:inline-flex;align-items:center;gap:6px;"><span style="width:13px;height:13px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite;display:inline-block;"></span> Uploading...</span>');
+  showLoad('result-garvis','Uploading file...');
   const fd=new FormData();fd.append('garvis_file',g.files[0]);
   try{
     const r=await fetch('/run/garvis-export',{method:'POST',body:fd});
     if(!r.ok){const e=await r.json().catch(()=>({error:r.statusText}));throw new Error(e.error||r.statusText);}
-    const blob=await r.blob(),url=URL.createObjectURL(blob);
-    const fn='GARVIS_OVERVIEW_'+new Date().toISOString().slice(0,13).replace(/[T:]/g,'')+'.xlsx';
-    document.getElementById('result-garvis').innerHTML=`<div class="result-card"><div class="alert alert-ok"><div class="alert-ico">&#9989;</div><div><div class="alert-ttl">Overview ready!</div>The file contains 3 sheets: Overview, Sales and Planner Forecast.</div></div><a class="btn-dl" href="${url}" download="${fn}">&#11015;&nbsp; Download overview (.xlsx)</a></div>`;
-  }catch(e){showErr('result-garvis',e.message);}
-  finally{setBtn('btn-garvis',false,'&#9654;&nbsp; Build overview');}
+    const data=await r.json();
+    const jobId=data.job_id;
+    setBtn('btn-garvis',true,'<span style="display:inline-flex;align-items:center;gap:6px;"><span style="width:13px;height:13px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite;display:inline-block;"></span> Processing...</span>');
+    showLoad('result-garvis','Building overview (this may take 1-2 minutes)...');
+    // Poll for result
+    const poll=setInterval(async()=>{
+      try{
+        const s=await fetch('/garvis-export/status/'+jobId);
+        const d=await s.json();
+        if(d.status==='done'){
+          clearInterval(poll);
+          const fn='GARVIS_OVERVIEW_'+new Date().toISOString().slice(0,13).replace(/[T:]/g,'')+'.xlsx';
+          document.getElementById('result-garvis').innerHTML=`<div class="result-card"><div class="alert alert-ok"><div class="alert-ico">&#9989;</div><div><div class="alert-ttl">Overview ready!</div>The file contains 3 sheets: Overview, Sales and Planner Forecast.</div></div><a class="btn-dl" href="/garvis-export/download/${jobId}" download="${fn}">&#11015;&nbsp; Download overview (.xlsx)</a></div>`;
+          setBtn('btn-garvis',false,'&#9654;&nbsp; Build overview');
+        }else if(d.status==='error'){
+          clearInterval(poll);
+          showErr('result-garvis',d.msg||'Unknown error.');
+          setBtn('btn-garvis',false,'&#9654;&nbsp; Build overview');
+        }else{
+          showLoad('result-garvis',d.msg||'Processing...');
+        }
+      }catch(e){}
+    },5000);
+  }catch(e){showErr('result-garvis',e.message);setBtn('btn-garvis',false,'&#9654;&nbsp; Build overview');}
 }
 </script>
 <!-- Bottom-right credit -->
