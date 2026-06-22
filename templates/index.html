@@ -213,6 +213,16 @@ body{font-family:'Nunito Sans',sans-serif;background:var(--cream);color:var(--in
           </div>
         </div>
       </div>
+      <div style="margin-top:14px;">
+        <div class="upload-lbl">PC-per-Box conversion list <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--muted-light);">(optional — leave empty to use the built-in list)</span></div>
+        <div class="upload-zone" id="zone-conversion" style="margin-top:6px;">
+          <input type="file" accept=".xlsx,.xls" id="input-conversion" onchange="handleFile(this,'zone-conversion','name-conversion')">
+          <span class="uz-icon">🔄</span>
+          <div class="uz-title">Drag or click to upload (optional)</div>
+          <div class="uz-hint">Column A = ProductID · Column E = PC per Box</div>
+          <div class="uz-name hidden" id="name-conversion"></div>
+        </div>
+      </div>
       <button class="btn-run" id="btn-launch" onclick="runLaunchCheck()">&#9654;&nbsp; Run script</button>
     </div>
     <div id="result-launch"></div>
@@ -279,6 +289,8 @@ async function runLaunchCheck(){
   if(!o.files[0]||!l.files[0]){showErr('result-launch','Please upload both files before running the script.');return;}
   setBtn('btn-launch',true);showLoad('result-launch','Analysing files');
   const fd=new FormData();fd.append('orders_file',o.files[0]);fd.append('launch_file',l.files[0]);
+  const conv=document.getElementById('input-conversion');
+  if(conv&&conv.files[0]){fd.append('conversion_file',conv.files[0]);}
   try{
     const r=await fetch('/run/launch-check',{method:'POST',body:fd});
     if(!r.ok){const e=await r.json().catch(()=>({error:r.statusText}));throw new Error(e.error||r.statusText);}

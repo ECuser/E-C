@@ -441,9 +441,13 @@ def api_launch_check():
     try:
         orders_file = request.files.get("orders_file")
         launch_file = request.files.get("launch_file")
+        conversion_file = request.files.get("conversion_file")  # optional
         if not orders_file or not launch_file:
             return jsonify({"error": "Upload both files."}), 400
-        output_buf, stats = run_launch_check(orders_file, launch_file)
+        output_buf, stats = run_launch_check(
+            orders_file, launch_file,
+            conversion_file=conversion_file if conversion_file else None
+        )
         return send_file(output_buf,
             mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
             as_attachment=True,

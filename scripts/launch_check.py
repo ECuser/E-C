@@ -69,9 +69,22 @@ def pick_col(df, candidates, fallback_idx=None):
         return df.columns[fallback_idx]
     raise KeyError(f"Could not find any of these columns: {candidates}. Available: {list(df.columns)}")
 
-def run_launch_check(orders_file, launch_file):
+def run_launch_check(orders_file, launch_file, conversion_file=None):
     orders = load_excel(orders_file, header_row=HEADER_ROW_ORDERS)
     launch = load_excel(launch_file, header_row=HEADER_ROW_LAUNCH)
+
+    # Build PC-per-BOX conversion map (hardcoded, optionally overridden by upload)
+    try:
+        from scripts.box_conversion import get_conversion_map
+    except ImportError:
+        from box_conversion import get_conversion_map
+    conv_df = None
+    if conversion_file is not None:
+        try:
+            conv_df = pd.read_excel(conversion_file, header=0)
+        except Exception:
+            conv_df = None
+    pc_per_box = get_conversion_map(conv_df)
 
     orders_order_date_col    = pick_col(orders, ["ORDER DATE", "ORDER_DATE", "DOCUMENT DATE"])
     orders_delivery_date_col = pick_col(orders, ["DELIVERY DATE", "DELIVERY_DATE"])
@@ -97,6 +110,38 @@ def run_launch_check(orders_file, launch_file):
     orders["delivery_date"] = orders[orders_delivery_date_col].map(safe_date)
     orders["order_qty"]     = orders[orders_qty_col].map(safe_num)
     orders["sales_unit"]    = orders[orders_sales_unit_col].astype(str).str.strip()
+
+    # ── Convert BOX quantities to PC ──────────────────────────────
+    # For lines where Sales Unit = BOX, multiply order qty by PC-per-BOX
+    # for that product. Lines in PC stay unchanged. Products not found
+    # in the conversion list stay in BOX (left unchanged).
+    # Match on the raw ProductID (conversion list uses raw IDs, e.g. "1000000").
+    orders["_pid_raw"] = orders[orders_material_col].apply(
+        lambda v: "" if pd.isna(v) else str(v).strip()
+    )
+    # Normalize IDs like "1000000.0" -> "1000000" for matching
+    def clean_pid(p):
+        p = str(p).strip()
+        if p.endswith(".0"):
+            p = p[:-2]
+        return p
+
+    def to_pc(row):
+        unit = str(row["sales_unit"]).strip().upper()
+        qty  = row["order_qty"]
+        if pd.isna(qty):
+            return qty
+        if unit == "BOX":
+            pid = clean_pid(row["_pid_raw"])
+            factor = pc_per_box.get(pid)
+            if factor:
+                return qty * factor
+        return qty
+
+    orders["order_qty"] = orders.apply(to_pc, axis=1)
+    # After conversion, all quantities represent PC
+    orders["sales_unit"] = "PC"
+    orders = orders.drop(columns=["_pid_raw"])
 
     orders = orders.dropna(subset=["order_date", "order_qty"])
     orders = orders[
